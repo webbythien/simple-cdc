@@ -1,0 +1,92 @@
+version: "3.9"
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:8.0.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "29092:9092"
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Q
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_PLUGIN_PATH: /kafka/connect
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - cdc-net
+
+  apicurio-registry:
+    image: apicurio/apicurio-registry-mem:2.6.2.Final
+    container_name: apicurio-registry
+    hostname: apicurio-registry
+    ports:
+      - "8081:8080"
+    networks:
+      - cdc-net
+
+  debezium:
+    image: quay.io/debezium/connect:3.0.0.Final
+    container_name: debezium
+    hostname: debezium
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+
+      ENABLE_APICURIO_CONVERTERS: "true"
+      KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+
+      CONNECT_KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+
+      CONNECT_VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+
+      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: avro
+
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AVRO_ENCODING:  JSON
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AVRO_ENCODING: JSON
+    networks:
+      - cdc-net
+
+  # ---------- Kafbat UI ----------
+  kafbat-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafbat-ui
+    hostname: kafbat-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    networks:
+      - cdc-net
+
+volumes:
+  kafka-data:
+
+networks:
+  cdc-net:
+    external: true

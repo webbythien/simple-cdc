@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db       
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: cdc
+    ports:
+      - "5433:5432"                   
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: >                      
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+    networks:
+      default:
+        aliases:
+          - db
+
+volumes:
+  pgdata:
+
+networks:
+  default:
+    external: true
+    name: cdc-net         
