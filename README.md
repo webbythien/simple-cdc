@@ -14,7 +14,7 @@ This demo sets up a complete CDC pipeline that:
 
 Watch the complete setup and demonstration of the CDC pipeline:
 
-[📹 **CDC Kafka Demo Video**](./demo.mp4)
+[📹 **CDC Kafka Demo Video**](https://github.com/user-attachments/assets/26be42bd-a61b-47a1-946a-cc66f1cf2cb4)
 
 *Click the link above to watch the demo video (demo.mp4)*
 
