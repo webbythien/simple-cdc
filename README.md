@@ -10,6 +10,21 @@ This demo sets up a complete CDC pipeline that:
 - Streams changes to Kafka topics
 - Monitors data changes in real-time
 
+## Video Demo
+
+Watch the complete setup and demonstration of the CDC pipeline:
+
+[📹 **CDC Kafka Demo Video**](./demo.mp4)
+
+*Click the link above to watch the demo video (demo.mp4)*
+
+### What the demo covers:
+- Setting up PostgreSQL with logical replication
+- Configuring and starting Debezium connector
+- Demonstrating real-time data capture
+- Monitoring CDC events in Kafka topics
+- Testing INSERT, UPDATE, and DELETE operations
+
 ## Prerequisites
 
 - Docker and Docker Compose
